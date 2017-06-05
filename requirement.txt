@@ -1,0 +1,13 @@
+Django==1.10.7
+django-debug-toolbar==1.4
+django-extensions==1.7.9
+django-filer==1.2.7
+django-mptt==0.8.7
+django-polymorphic==1.0.2
+easy-thumbnails==2.3
+olefile==0.44
+Pillow==4.1.1
+psycopg2==2.7.1
+six==1.10.0
+sqlparse==0.2.3
+Unidecode==0.4.20
