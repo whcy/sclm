@@ -38,11 +38,10 @@ INSTALLED_APPS = [
     'django.contrib.sessions',
     'django.contrib.messages',
     'django.contrib.staticfiles',
-    'django-'
     'easy_thumbnails',
     'filer',
-    'mptt'
-    'django-extensions'
+    'mptt',
+    'django-extensions',
     'django-debug-toolbar'
 
 ]
@@ -83,7 +82,7 @@ WSGI_APPLICATION = 'sknowledge.wsgi.application'
 
 MEDIA_URL = '/media/'
 MEDIA_ROOT = os.path.join(BASE_DIR, 'media')
-F
+
 # Database
 # https://docs.djangoproject.com/en/1.9/ref/settings/#databases
 
@@ -100,7 +99,7 @@ DATABASES = {
         'HOST': '127.0.0.1',
  
 }
-
+}
 
 # Password validation
 # https://docs.djangoproject.com/en/1.9/ref/settings/#auth-password-validators
