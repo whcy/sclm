@@ -43,7 +43,6 @@ INSTALLED_APPS = [
     'mptt',
     'django-extensions',
     'django-debug-toolbar'
-
 ]
 
 MIDDLEWARE_CLASSES = [
