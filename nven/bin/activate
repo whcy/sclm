@@ -39,8 +39,9 @@ deactivate () {
 
 # unset irrelevant variables
 deactivate nondestructive
-
-VIRTUAL_ENV="/home/chenyu/prj/django/sclm/nven"
+VIRTUAL_ENV="/Users/chenyu/prj/django/sclm/sclm/nven"
+# VIRTUAL_ENV="/home/chenyu/prj/django/sclm/nven"
+# VIRTUAL_ENV=`pwd`
 export VIRTUAL_ENV
 
 _OLD_VIRTUAL_PATH="$PATH"

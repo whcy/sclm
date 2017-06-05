@@ -41,8 +41,8 @@ INSTALLED_APPS = [
     'easy_thumbnails',
     'filer',
     'mptt',
-    'django-extensions',
-    'django-debug-toolbar'
+    'django_extensions',
+    # 'debug_toolbar'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -54,7 +54,8 @@ MIDDLEWARE_CLASSES = [
     'django.contrib.auth.middleware.SessionAuthenticationMiddleware',
     'django.contrib.messages.middleware.MessageMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
-    'django.template.context_processors.request',
+    # 'django.template.context_processors.request',
+    # 'debug_toolbar.middleware.DebugToolbarMiddleware',
 ]
 
 ROOT_URLCONF = 'sknowledge.urls'
@@ -90,13 +91,20 @@ DATABASES = {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     # }
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': "mysites",
-        'USER': 'root',
+    # 'default': {
+    #     'ENGINE': 'django.db.backends.mysql',
+    #     'NAME': "mysites",
+    #     'USER': 'root',
+    #     'PASSWORD': 'cy78102',
+    #     'HOST': '127.0.0.1',
+# }
+    'default':{
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': "sknowledge",
+        'USER': 'postgres',
         'PASSWORD': 'cy78102',
         'HOST': '127.0.0.1',
- 
+
 }
 }
 
@@ -158,4 +166,15 @@ STATIC_ROOT = (
 #  debugtool-bar settings
 INTERNAL_IPS = ('127.0.0.1',)
 DEBUG_TOOLBAR_CONFIG = {'JQUERY_URL': r"http://code.jquery.com/jquery-2.1.1.min.js", }
-
+FILER_CANONICAL_URL = 'media/'
+FILER_DEBUG = True
+FILER_ENABLE_LOGGING = True
+THUMBNAIL_HIGH_RESOLUTION = True
+FILER_ENABLE_PERMISSIONS = True
+THUMBNAIL_PROCESSORS = (
+    'easy_thumbnails.processors.colorspace',
+    'easy_thumbnails.processors.autocrop',
+    'easy_thumbnails.processors.scale_and_crop',
+    'filer.thumbnail_processors.scale_and_crop_with_subject_location',
+    'easy_thumbnails.processors.filters',
+)
