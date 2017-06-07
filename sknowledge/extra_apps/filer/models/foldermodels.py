@@ -15,7 +15,7 @@ from django.utils.translation import ugettext_lazy as _
 from . import mixins
 from .. import settings as filer_settings
 from ..utils.compatibility import python_2_unicode_compatible
-
+# from ..fields.image import FilerImageField
 
 class FolderManager(models.Manager):
     def with_bad_metadata(self):
@@ -114,6 +114,8 @@ class Folder(models.Model, mixins.IconsMixin):
 
     objects = FolderManager()
 
+    # add
+    # fold_img = FilerImageField(null=True, blank=True)
     @property
     def file_count(self):
         if not hasattr(self, '_file_count_cache'):
