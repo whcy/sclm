@@ -16,7 +16,7 @@ from . import mixins
 from .. import settings as filer_settings
 from ..utils.compatibility import python_2_unicode_compatible
 # from ..fields.image import FilerImageField
-
+# import .. fields.image
 class FolderManager(models.Manager):
     def with_bad_metadata(self):
         return self.get_query_set().filter(has_all_mandatory_data=False)
@@ -227,6 +227,12 @@ class Folder(models.Model, mixins.IconsMixin):
             return True
         except Folder.DoesNotExist:
             return False
+
+
+    @property
+    def icons(self):
+        from ..fields.image import FilerImageField
+        pass
 
     class Meta(object):
         unique_together = (('parent', 'name'),)
