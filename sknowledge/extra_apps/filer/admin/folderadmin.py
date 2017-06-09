@@ -70,7 +70,8 @@ class AddFolderPopupForm(forms.ModelForm):
 
 
 class FolderAdmin(PrimitivePermissionAwareModelAdmin):
-    list_display = ('name',)
+    # list_display = ('name',)
+    list_display = ('name', 'dire_phone',)
     exclude = ('parent',)
     list_per_page = 20
     list_filter = ('owner',)

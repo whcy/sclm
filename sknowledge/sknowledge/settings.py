@@ -101,21 +101,21 @@ DATABASES = {
     #     'ENGINE': 'django.db.backends.sqlite3',
     #     'NAME': os.path.join(BASE_DIR, 'db.sqlite3'),
     # }
-    'default': {
-        'ENGINE': 'django.db.backends.mysql',
-        'NAME': "mysites",
-        'USER': 'root',
-        'PASSWORD': 'cy78102',
-        'HOST': '127.0.0.1',
-}
-#     'default':{
-#         'ENGINE': 'django.db.backends.postgresql_psycopg2',
-#         'NAME': "sknowledge",
-#         'USER': 'postgres',
+#     'default': {
+#         'ENGINE': 'django.db.backends.mysql',
+#         'NAME': "mysites",
+#         'USER': 'root',
 #         'PASSWORD': 'cy78102',
 #         'HOST': '127.0.0.1',
-
 # }
+    'default':{
+        'ENGINE': 'django.db.backends.postgresql_psycopg2',
+        'NAME': "sknowledge",
+        'USER': 'postgres',
+        'PASSWORD': 'cy78102',
+        'HOST': '127.0.0.1',
+
+}
 }
 
 # Password validation

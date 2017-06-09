@@ -7,4 +7,4 @@ from django.utils.translation import ugettext_lazy as _
 
 class FilerConfig(AppConfig):
     name = 'filer'
-    verbose_name = _("Filer")
+    verbose_name = _(u"知识库管理系统")

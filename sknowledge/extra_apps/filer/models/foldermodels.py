@@ -15,8 +15,10 @@ from django.utils.translation import ugettext_lazy as _
 from . import mixins
 from .. import settings as filer_settings
 from ..utils.compatibility import python_2_unicode_compatible
-# from ..fields.image import FilerImageField
-# import .. fields.image
+from prodire.models import Pro_icon 
+
+
+
 class FolderManager(models.Manager):
     def with_bad_metadata(self):
         return self.get_query_set().filter(has_all_mandatory_data=False)
@@ -108,14 +110,15 @@ class Folder(models.Model, mixins.IconsMixin):
                               null=True, blank=True)
 
     uploaded_at = models.DateTimeField(_('uploaded at'), auto_now_add=True)
-
+ 
     created_at = models.DateTimeField(_('created at'), auto_now_add=True)
     modified_at = models.DateTimeField(_('modified at'), auto_now=True)
 
     objects = FolderManager()
-
-    # add
-    # fold_img = FilerImageField(null=True, blank=True)
+    #add
+    dire_phone = models.ForeignKey(Pro_icon, verbose_name=(u'目录图标'),\
+                                   blank=True, null=True)
+    #add
     @property
     def file_count(self):
         if not hasattr(self, '_file_count_cache'):
