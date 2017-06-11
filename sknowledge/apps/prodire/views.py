@@ -2,7 +2,7 @@ from django.shortcuts import render
 
 # Create your views here.
 def updatePicture(request):
-    if request.method = 'post':
+    if request.method == 'post':
         picture = request.FILES['picture']
 
     if picture:
