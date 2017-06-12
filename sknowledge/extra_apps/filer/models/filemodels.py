@@ -143,7 +143,7 @@ class File(PolymorphicModel, mixins.IconsMixin):
                     'to anyone.'))
 
     objects = FileManager()
-
+    perm = models.OneToOneField('FilePermission')
     @classmethod
     def matches_file_type(cls, iname, ifile, request):
         return True  # I match all files...
@@ -480,7 +480,7 @@ class FilePermission(models.Model):
     )
 
     # folder = models.ForeignKey(Folder, verbose_name=('folder'), null=True, blank=True)
-    file = models.ForeignKey(File, verbose_name=('file'), null=True, blank=True)
+    # file = models.ForeignKey(File, verbose_name=('file'), null=True, blank=True, related_name='perms')
     # type = models.SmallIntegerField(_('type'), choices=TYPES, default=ALL)
     user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), related_name="filer_file_permissions", on_delete=models.SET_NULL,verbose_name=_("user"), blank=True, null=True)
     group = models.ForeignKey(auth_models.Group,related_name="filer_file_permissions", verbose_name=_("group"), blank=True, null=True)
@@ -519,10 +519,6 @@ class FilePermission(models.Model):
             perms, usergroup)
 
     def clean(self):
-        if self.type == self.ALL and self.folder:
-            raise ValidationError('Folder cannot be selected with type "all items".')
-        if self.type != self.ALL and not self.folder:
-            raise ValidationError('Folder has to be selected when type is not "all items".')
         if self.everybody and (self.user or self.group):
             raise ValidationError('User or group cannot be selected together with "everybody".')
         if not self.user and not self.group and not self.everybody:

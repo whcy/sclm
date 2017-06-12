@@ -62,7 +62,8 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
         if settings.FILER_ENABLE_PERMISSIONS:
             fieldsets = fieldsets + (
                 (None, {
-                    'fields': ('is_public',)
+                    'fields': ('is_public',
+                           'perm'    )
                 }),
             )
         return fieldsets
