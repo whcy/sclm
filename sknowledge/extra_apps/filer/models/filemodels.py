@@ -9,9 +9,11 @@ from datetime import datetime
 from django.conf import settings
 from django.contrib.auth import models as auth_models
 from django.core import urlresolvers
+from django.core.exceptions import ValidationError
 from django.core.files.base import ContentFile
 from django.db import models
 from django.db.models import Q
+from django.utils.http import urlquote
 from django.utils import timezone
 from django.utils.translation import ugettext_lazy as _
 
@@ -41,8 +43,8 @@ class FileManager(PolymorphicManager):
 
     def find_duplicates(self, file_obj):
         return [i for i in self.exclude(pk=file_obj.pk).filter(sha1=file_obj.sha1)]
-'''
-class FilerPermissionManager(models.Manager):
+    
+class FilePermissionManager(models.Manager):
     """
     Theses methods are called by introspection from "has_generic_permisison" on
     the folder model.
@@ -67,8 +69,9 @@ class FilerPermissionManager(models.Manager):
         deny_list = set()
         group_ids = user.groups.all().values_list('id', flat=True)
         q = Q(user=user) | Q(group__in=group_ids) | Q(everybody=True)
-        perms = self.filter(q).order_by('folder__tree_id', 'folder__level',
-                                        'folder__lft')
+        # perms = self.filter(q).order_by('folder__tree_id', 'folder__level',
+                                        # 'folder__lft')
+        perms = self.filter(q)
         for perm in perms:
             p = getattr(perm, attr)
 
@@ -76,33 +79,33 @@ class FilerPermissionManager(models.Manager):
                 # Not allow nor deny, we continue with the next permission
                 continue
 
-            if not perm.folder:
-                assert perm.type == FolderPermission.ALL
+            # if not perm.file:
+            #     assert perm.type == FilePermission.ALL
 
-                if p == FolderPermission.ALLOW:
-                    allow_list.update(Folder.objects.all().values_list('id', flat=True))
-                else:
-                    deny_list.update(Folder.objects.all().values_list('id', flat=True))
+            #     if p == FilePermission.ALLOW:
+            #         allow_list.update(Folder.objects.all().values_list('id', flat=True))
+            #     else:
+            #         deny_list.update(Folder.objects.all().values_list('id', flat=True))
 
-                continue
+            #     continue
 
-            folder_id = perm.folder.id
+            file_id = perm.file.id
 
-            if p == FolderPermission.ALLOW:
-                allow_list.add(folder_id)
+            if p == FilePermission.ALLOW:
+                allow_list.add(file_id)
             else:
-                deny_list.add(folder_id)
+                deny_list.add(file_id)
 
-            if perm.type == FolderPermission.CHILDREN:
-                if p == FolderPermission.ALLOW:
-                    allow_list.update(perm.folder.get_descendants().values_list('id', flat=True))
-                else:
-                    deny_list.update(perm.folder.get_descendants().values_list('id', flat=True))
+            # if perm.type == FolderPermission.CHILDREN:
+            #     if p == FolderPermission.ALLOW:
+            #         allow_list.update(perm.folder.get_descendants().values_list('id', flat=True))
+            #     else:
+            #         deny_list.update(perm.folder.get_descendants().values_list('id', flat=True))
 
         # Deny has precedence over allow
         return allow_list - deny_list
 
-'''
+
 
 @python_2_unicode_compatible
 class File(PolymorphicModel, mixins.IconsMixin):
@@ -309,6 +312,48 @@ class File(PolymorphicModel, mixins.IconsMixin):
         else:
             text = "%s" % (self.name,)
         return text
+    
+    def has_edit_permission(self, request):
+        return self.has_generic_permission(request, 'edit')
+
+    def has_read_permission(self, request):
+        return self.has_generic_permission(request, 'read')
+
+
+    def has_generic_permission(self, request, permission_type):
+        """
+        Return true if the current user has permission on this
+        file. Return the string 'ALL' if the user has all rights.
+        """
+        user = request.user
+        if not user.is_authenticated():
+            return False
+        elif user.is_superuser:
+            return True
+        elif user == self.owner:
+            return True
+        else:
+            if not hasattr(self, "permission_cache") or\
+               permission_type not in self.permission_cache or \
+               request.user.pk != self.permission_cache['user'].pk:
+                if not hasattr(self, "permission_cache") or request.user.pk != self.permission_cache['user'].pk:
+                    self.permission_cache = {
+                        'user': request.user,
+                    }
+
+                # This calls methods on the manager i.e. get_read_id_list()
+                func = getattr(FilePermission.objects,
+                               "get_%s_id_list" % permission_type)
+                permission = func(user)
+                if permission == "All":
+                    self.permission_cache[permission_type] = True
+                    self.permission_cache['read'] = True
+                    self.permission_cache['edit'] = True
+                    self.permission_cache['add_children'] = True
+                else:
+                    self.permission_cache[permission_type] = self.id in permission
+            return self.permission_cache[permission_type]
+
 
     def get_admin_change_url(self):
         if LTE_DJANGO_1_7:
@@ -412,3 +457,78 @@ class File(PolymorphicModel, mixins.IconsMixin):
         app_label = 'filer'
         verbose_name = _('file')
         verbose_name_plural = _('files')
+
+@python_2_unicode_compatible
+
+class FilePermission(models.Model):
+    ALL = 0
+    THIS = 1
+
+
+    ALLOW = 1
+    DENY = 0
+
+    # TYPES = (
+    #     (ALL, _('all items')),
+    #     (THIS, _('this item only')),
+    #     (CHILDREN, _('this item and all children')),
+    # )
+
+    PERMISIONS = (
+        (ALLOW, _('allow')),
+        (DENY, _('deny')),
+    )
+
+    # folder = models.ForeignKey(Folder, verbose_name=('folder'), null=True, blank=True)
+    file = models.ForeignKey(File, verbose_name=('file'), null=True, blank=True)
+    # type = models.SmallIntegerField(_('type'), choices=TYPES, default=ALL)
+    user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), related_name="filer_file_permissions", on_delete=models.SET_NULL,verbose_name=_("user"), blank=True, null=True)
+    group = models.ForeignKey(auth_models.Group,related_name="filer_file_permissions", verbose_name=_("group"), blank=True, null=True)
+    everybody = models.BooleanField(_("everybody"), default=False)
+
+    can_edit = models.SmallIntegerField(_("can edit"), choices=PERMISIONS, blank=True, null=True, default=None)
+    can_read = models.SmallIntegerField(_("can read"), choices=PERMISIONS, blank=True, null=True, default=None)
+    # can_add_children = models.SmallIntegerField(_("can add children"), choices=PERMISIONS, blank=True, null=True, default=None)
+    objects = FilePermissionManager()
+
+    def __str__(self):
+        if self.file:
+            name = '%s' % self.file
+        else:
+            name = 'All Files'
+
+        ug = []
+        if self.everybody:
+            ug.append('Everybody')
+        else:
+            if self.group:
+                ug.append("Group: %s" % self.group)
+            if self.user:
+                ug.append("User: %s" % self.user)
+        usergroup = " ".join(ug)
+        perms = []
+        for s in ['can_edit', 'can_read']:
+            perm = getattr(self, s)
+            if perm == self.ALLOW:
+                perms.append(s)
+            elif perm == self.DENY:
+                perms.append('!%s' % s)
+        perms = ', '.join(perms)
+        return "File: '%s'->%s [%s] [%s]" % (
+            name, self.get_type_display(),
+            perms, usergroup)
+
+    def clean(self):
+        if self.type == self.ALL and self.folder:
+            raise ValidationError('Folder cannot be selected with type "all items".')
+        if self.type != self.ALL and not self.folder:
+            raise ValidationError('Folder has to be selected when type is not "all items".')
+        if self.everybody and (self.user or self.group):
+            raise ValidationError('User or group cannot be selected together with "everybody".')
+        if not self.user and not self.group and not self.everybody:
+            raise ValidationError('At least one of user, group, or "everybody" has to be selected.')
+
+    class Meta(object):
+        verbose_name = _('file permission')
+        verbose_name_plural = _('file permissions')
+        app_label = 'filer'

@@ -7,7 +7,7 @@ from django.http import HttpResponseRedirect
 from django.utils.translation import ugettext as _
 
 from .. import settings
-from ..models import File
+from ..models import File,FilePermission
 from ..utils.compatibility import LTE_DJANGO_1_5, LTE_DJANGO_1_6, unquote
 from .permissions import PrimitivePermissionAwareModelAdmin
 from .tools import AdminContext, admin_url_params_encoded, popup_status
