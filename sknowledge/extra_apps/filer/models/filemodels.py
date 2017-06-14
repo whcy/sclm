@@ -484,7 +484,7 @@ class FilePermission(models.Model):
     # file = models.OneToOneField(File, verbose_name=('file'), null=True, blank=True, related_name='perms')
     # type = models.SmallIntegerField(_('type'), choices=TYPES, default=ALL)
     user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), related_name="filer_file_permissions", on_delete=models.SET_NULL,verbose_name=_("user"), blank=True, null=True)
-    group = models.ManyToManyField(auth_models.Group,related_name="filer_file_permissions", verbose_name=_("group"), blank=True, null=True)
+    group = models.ForeignKey(auth_models.Group,related_name="filer_file_permissions", verbose_name=_("group"), blank=True, null=True)
     everybody = models.BooleanField(_("everybody"), default=False)
 
     can_edit = models.SmallIntegerField(_("can edit"), choices=PERMISIONS, blank=True, null=True, default=None)
