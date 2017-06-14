@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 from __future__ import absolute_import
 
-from django.contrib import admin
 from django import forms
 from django.core.urlresolvers import reverse
 from django.http import HttpResponseRedirect
@@ -14,11 +13,7 @@ from .permissions import PrimitivePermissionAwareModelAdmin
 from .tools import AdminContext, admin_url_params_encoded, popup_status
 
 
-# class FilerPermissionInline(admin.TabularInline):
-#     model = FilePermission
-
 class FileAdminChangeFrom(forms.ModelForm):
-    
     class Meta(object):
         model = File
         exclude = ()
@@ -30,9 +25,7 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
     search_fields = ['name', 'original_filename', 'sha1', 'description']
     raw_id_fields = ('owner',)
     readonly_fields = ('sha1', 'display_canonical')
-    inlines = [
-        # FilerPermissionInline,
-    ]
+
     # save_as hack, because without save_as it is impossible to hide the
     # save_and_add_another if save_as is False. To show only save_and_continue
     # and save in the submit row we need save_as=True and in
@@ -70,8 +63,7 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
             fieldsets = fieldsets + (
                 (None, {
                     'fields': ('is_public',
-                           'perm'
-                           )
+                           'perm'    )
                 }),
             )
         return fieldsets
@@ -174,4 +166,3 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
     display_canonical.short_description = _('canonical URL')
 
 FileAdmin.fieldsets = FileAdmin.build_fieldsets()
-admin.site.register(FilePermission)

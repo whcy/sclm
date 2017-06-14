@@ -89,12 +89,12 @@ class FilePermissionManager(models.Manager):
 
             #     continue
 
-            file_ids = perm.file_set.all().values_list('id', flat=True)
+            file_id = perm.file.id
 
             if p == FilePermission.ALLOW:
-                allow_list.update(file_ids)
+                allow_list.add(file_id)
             else:
-                deny_list.update(file_ids)
+                deny_list.add(file_id)
 
             # if perm.type == FolderPermission.CHILDREN:
             #     if p == FolderPermission.ALLOW:
@@ -143,8 +143,7 @@ class File(PolymorphicModel, mixins.IconsMixin):
                     'to anyone.'))
 
     objects = FileManager()
-    perm = models.ForeignKey('FilePermission', verbose_name=(u'权限'),null=True, blank=True)
-
+    perm = models.OneToOneField('FilePermission')
     @classmethod
     def matches_file_type(cls, iname, ifile, request):
         return True  # I match all files...
@@ -481,23 +480,22 @@ class FilePermission(models.Model):
     )
 
     # folder = models.ForeignKey(Folder, verbose_name=('folder'), null=True, blank=True)
-    # file = models.OneToOneField(File, verbose_name=('file'), null=True, blank=True, related_name='perms')
+    # file = models.ForeignKey(File, verbose_name=('file'), null=True, blank=True, related_name='perms')
     # type = models.SmallIntegerField(_('type'), choices=TYPES, default=ALL)
     user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), related_name="filer_file_permissions", on_delete=models.SET_NULL,verbose_name=_("user"), blank=True, null=True)
-    group = models.ManyToManyField(auth_models.Group,related_name="filer_file_permissions", verbose_name=_("group"), blank=True, null=True)
+    group = models.ForeignKey(auth_models.Group,related_name="filer_file_permissions", verbose_name=_("group"), blank=True, null=True)
     everybody = models.BooleanField(_("everybody"), default=False)
 
     can_edit = models.SmallIntegerField(_("can edit"), choices=PERMISIONS, blank=True, null=True, default=None)
     can_read = models.SmallIntegerField(_("can read"), choices=PERMISIONS, blank=True, null=True, default=None)
     # can_add_children = models.SmallIntegerField(_("can add children"), choices=PERMISIONS, blank=True, null=True, default=None)
     objects = FilePermissionManager()
-    name = models.CharField(max_length=255, default="", blank=True,
-        verbose_name=_('name'))
+
     def __str__(self):
-        # if self.file:
-        #     name = '%s' % self.file
-        # else:
-        #     name = 'All Files'
+        if self.file:
+            name = '%s' % self.file
+        else:
+            name = 'All Files'
 
         ug = []
         if self.everybody:
@@ -516,8 +514,9 @@ class FilePermission(models.Model):
             elif perm == self.DENY:
                 perms.append('!%s' % s)
         perms = ', '.join(perms)
-        return "File: '%s'->[%s] [%s]" % (
-           self.name, perms, usergroup)
+        return "File: '%s'->%s [%s] [%s]" % (
+            name, self.get_type_display(),
+            perms, usergroup)
 
     def clean(self):
         if self.everybody and (self.user or self.group):
