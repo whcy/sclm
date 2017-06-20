@@ -68,7 +68,8 @@ class FilePermissionManager(models.Manager):
         allow_list = set()
         deny_list = set()
         group_ids = user.groups.all().values_list('id', flat=True)
-        q = Q(user=user) | Q(group__in=group_ids) | Q(everybody=True)
+        # q = Q(user=user) | Q(group__in=group_ids) | Q(everybody=True)
+        q = Q(groups__in=group_ids) | Q(everybody=True)
         # perms = self.filter(q).order_by('folder__tree_id', 'folder__level',
                                         # 'folder__lft')
         perms = self.filter(q)
@@ -355,7 +356,6 @@ class File(PolymorphicModel, mixins.IconsMixin):
                     self.permission_cache[permission_type] = self.id in permission
             return self.permission_cache[permission_type]
 
-
     def get_admin_change_url(self):
         if LTE_DJANGO_1_7:
             model_name = self._meta.module_name
@@ -483,47 +483,53 @@ class FilePermission(models.Model):
     # folder = models.ForeignKey(Folder, verbose_name=('folder'), null=True, blank=True)
     # file = models.OneToOneField(File, verbose_name=('file'), null=True, blank=True, related_name='perms')
     # type = models.SmallIntegerField(_('type'), choices=TYPES, default=ALL)
-    user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), related_name="filer_file_permissions", on_delete=models.SET_NULL,verbose_name=_("user"), blank=True, null=True)
-    group = models.ForeignKey(auth_models.Group,related_name="filer_file_permissions", verbose_name=_("group"), blank=True, null=True)
+    # user = models.ForeignKey(getattr(settings, 'AUTH_USER_MODEL', 'auth.User'), related_name="filer_file_permissions", on_delete=models.SET_NULL,verbose_name=_("user"), blank=True, null=True)
+    groups = models.ManyToManyField(auth_models.Group,related_name="filer_file_permissions", verbose_name=_("group"), blank=True, null=True)
     everybody = models.BooleanField(_("everybody"), default=False)
 
-    can_edit = models.SmallIntegerField(_("can edit"), choices=PERMISIONS, blank=True, null=True, default=None)
+    can_edit = models.SmallIntegerField(_(u"can edit"), choices=PERMISIONS, blank=True, null=True, default=None)
     can_read = models.SmallIntegerField(_("can read"), choices=PERMISIONS, blank=True, null=True, default=None)
     # can_add_children = models.SmallIntegerField(_("can add children"), choices=PERMISIONS, blank=True, null=True, default=None)
     objects = FilePermissionManager()
     name = models.CharField(max_length=255, default="", blank=True,
         verbose_name=_('name'))
     def __str__(self):
+        return self.name
         # if self.file:
         #     name = '%s' % self.file
         # else:
         #     name = 'All Files'
 
-        ug = []
-        if self.everybody:
-            ug.append('Everybody')
-        else:
-            if self.group:
-                ug.append("Group: %s" % self.group)
-            if self.user:
-                ug.append("User: %s" % self.user)
-        usergroup = " ".join(ug)
-        perms = []
-        for s in ['can_edit', 'can_read']:
-            perm = getattr(self, s)
-            if perm == self.ALLOW:
-                perms.append(s)
-            elif perm == self.DENY:
-                perms.append('!%s' % s)
-        perms = ', '.join(perms)
-        return "File: '%s'->[%s] [%s]" % (
-           self.name, perms, usergroup)
+        # ug = []
+        # if self.everybody:
+        #     ug.append('Everybody')
+        # else:
+        #     if self.groups.all().exists():
+        #         for group in self.groups.all():
+        #             ug.append("Group: %s" % group)
+        #     # if self.user:
+        #     #     ug.append("User: %s" % self.user)
+        # usergroup = " ".join(ug)
+        # perms = []
+        # for s in ['can_edit', 'can_read']:
+        #     perm = getattr(self, s)
+        #     if perm == self.ALLOW:
+        #         perms.append(s)
+        #     elif perm == self.DENY:
+        #         perms.append('!%s' % s)
+        # perms = ', '.join(perms)
+        # return "Perm: '%s'->[%s] [%s]" % (
+        #     self.name, perms, ug)
 
     def clean(self):
-        if self.everybody and (self.user or self.group):
-            raise ValidationError('User or group cannot be selected together with "everybody".')
-        if not self.user and not self.group and not self.everybody:
-            raise ValidationError('At least one of user, group, or "everybody" has to be selected.')
+        # if self.everybody and (self.user or self.group):
+        # if self.everybody and self.groups.all().exists():
+        #     raise ValidationError('User or group cannot be selected together with "everybody".')
+        # # if not self.user and not self.groups and not self.everybody:
+        # if not self.groups.all().exists() and not self.everybody:
+        #     raise ValidationError('At least one of user, group, or "everybody" has to be selected.')
+        pass
+
 
     class Meta(object):
         verbose_name = _('file permission')

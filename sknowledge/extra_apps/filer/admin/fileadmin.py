@@ -13,8 +13,12 @@ from ..utils.compatibility import LTE_DJANGO_1_5, LTE_DJANGO_1_6, unquote
 from .permissions import PrimitivePermissionAwareModelAdmin
 from .tools import AdminContext, admin_url_params_encoded, popup_status
 
+from django.forms import CheckboxSelectMultiple
 
 # class FilerPermissionInline(admin.TabularInline):
+#     model = FilePermission
+
+# class FilePermissionInline(admin.StackedInline):
 #     model = FilePermission
 
 class FileAdminChangeFrom(forms.ModelForm):
@@ -28,11 +32,12 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
     list_display = ('label',)
     list_per_page = 10
     search_fields = ['name', 'original_filename', 'sha1', 'description']
-    raw_id_fields = ('owner',)
+    raw_id_fields = ('owner', )
     readonly_fields = ('sha1', 'display_canonical')
     inlines = [
-        # FilerPermissionInline,
+        # FilePermissionInline,
     ]
+    
     # save_as hack, because without save_as it is impossible to hide the
     # save_and_add_another if save_as is False. To show only save_and_continue
     # and save in the submit row we need save_as=True and in
@@ -173,5 +178,22 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
     display_canonical.allow_tags = True
     display_canonical.short_description = _('canonical URL')
 
+
+class FilePermissionAdminChangeFrom(forms.ModelForm):
+    
+    class Meta(object):
+        model = FilePermission
+        exclude = ()
+        widgets = {
+            'groups': CheckboxSelectMultiple
+        }
+
+class FilePermissionAdmin(admin.ModelAdmin):
+    list_display = ('name', 'can_read', 'can_edit', 'everybody')
+    search_fields = ['name']
+    form = FilePermissionAdminChangeFrom
+    fields = ('name', 'can_read', 'can_edit', 'everybody', 'groups')
+
+
 FileAdmin.fieldsets = FileAdmin.build_fieldsets()
-admin.site.register(FilePermission)
+admin.site.register(FilePermission, FilePermissionAdmin)

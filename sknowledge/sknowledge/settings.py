@@ -44,6 +44,7 @@ INSTALLED_APPS = [
     'mptt',
     'debug_toolbar',
     'django_extensions',
+    'logmanager',
     'prodire'
 ]
 
