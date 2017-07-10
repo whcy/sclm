@@ -15,9 +15,12 @@ from django.utils.translation import ugettext_lazy as _
 from . import mixins
 from .. import settings as filer_settings
 from ..utils.compatibility import python_2_unicode_compatible
-from prodire.models import Pro_icon 
 
 
+from django.utils import six
+import logging
+logger = logging.getLogger(__name__)
+from easy_thumbnails.fields import ThumbnailerImageField
 
 class FolderManager(models.Manager):
     def with_bad_metadata(self):
@@ -84,7 +87,6 @@ class FolderPermissionManager(models.Manager):
         # Deny has precedence over allow
         return allow_list - deny_list
 
-
 @python_2_unicode_compatible
 class Folder(models.Model, mixins.IconsMixin):
     """
@@ -116,9 +118,11 @@ class Folder(models.Model, mixins.IconsMixin):
 
     objects = FolderManager()
     #add
-    dire_phone = models.ForeignKey(Pro_icon, verbose_name=(u'目录图标'),\
-                                   blank=True, null=True)
-    #add
+    description = models.TextField(null=True, blank=True,
+        verbose_name=_(u' 描述信息'))
+    # diricon = models.ImageField(upload_to='img/', null=True, blank=True,verbose_name=(u'目录图标'))
+    diricon = ThumbnailerImageField(upload_to='img/', resize_source=dict(size=(10, 10)), null=True, blank=True,verbose_name=(u'目录图标'))
+
     @property
     def file_count(self):
         if not hasattr(self, '_file_count_cache'):
@@ -201,10 +205,61 @@ class Folder(models.Model, mixins.IconsMixin):
                 else:
                     self.permission_cache[permission_type] = self.id in permission
             return self.permission_cache[permission_type]
+        
+    # def get_childfile_read(self,user):
+    def get_childfile_read(self, **kw):
+        from .filemodels import File, FilePermission
+        files=set()
+        if self.file_count !=0:
+            if self.all_files.filter(ispublic=True).count():
+               ispublic_files = self.all_files.filter(ispublic=True)
+               files.update(ispublic_files)
+            if kw.has_key('user'):
+                hasuser=kw['user']
+                filelist = FilePermission.objects.get_read_id_list(hasuser)
+                for onefile in filelist:
+                    files.add(File.objects.get(id=onefile))
+        return files
+
+    def get_childfolder_read(self, user):
+        # from .filemodels import File, FilePermission
+        folds = set()
+        for fold in self.get_children():
+            can_read = fold.is_user_read(user)
+            if can_read:
+                folds.add(fold.id)
+        return folds
+
+    def is_user_read(self, user):
+        from .filemodels import File, FilePermission
+        if self.file_count != 0:
+            if self.all_files.filter(ispublic=True).count():
+                can_read = True
+                return can_read
+            else:
+                filelist = FilePermission.objects.get_read_id_list(user)
+                for onefile in self.files:
+                    if onefile.id in filelist:
+                        can_read = True
+                        return can_read
+        if self.children_count == 0:
+            can_read = False
+            return can_read
+        else:
+            for fold in self.get_children():
+                can_read = fold.is_user_read(user)
+                if can_read:
+                    return can_read
+        can_read = False
+        return can_read
+
+
 
     def get_admin_change_url(self):
+
         return urlresolvers.reverse('admin:filer_folder_change',
                                     args=(self.id,))
+        # return 1
 
     def get_admin_directory_listing_url_path(self):
         return urlresolvers.reverse('admin:filer-directory_listing',
@@ -231,11 +286,38 @@ class Folder(models.Model, mixins.IconsMixin):
         except Folder.DoesNotExist:
             return False
 
-
     @property
     def icons(self):
-        from ..fields.image import FilerImageField
-        pass
+        # from ..fields.image import FilerImageField
+        # pass
+        required_thumbnails = dict(
+            (size, {'size': (int(size), int(size)),
+                    'crop': True,
+                    'upscale': True,
+                    # 'subject_location': self.subject_location
+            })
+            for size in filer_settings.FILER_ADMIN_ICON_SIZES)
+        return self._generate_thumbnails(required_thumbnails)
+
+    def _generate_thumbnails(self, required_thumbnails):
+        _thumbnails = {}
+        for name, opts in six.iteritems(required_thumbnails):
+            try:
+                # opts.update({'subject_location': self.subject_location})
+                thumb = self.diricon.file.get_thumbnail(opts)
+                _thumbnails[name] = thumb.url
+            except Exception as e:
+                # catch exception and manage it. We can re-raise it for debugging
+                # purposes and/or just logging it, provided user configured
+                # proper logging configuration
+                if filer_settings.FILER_ENABLE_LOGGING:
+                    logger.error('Error while generating thumbnail: %s', e)
+                if filer_settings.FILER_DEBUG:
+                    raise
+        return _thumbnails
+
+
+
 
     class Meta(object):
         unique_together = (('parent', 'name'),)

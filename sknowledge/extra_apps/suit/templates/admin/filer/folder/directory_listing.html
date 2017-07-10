@@ -248,7 +248,13 @@
             </div>
         </div>
     </div>
-    <div id="content-main">
+    <div id="content-main" class="inner-two-columns clearfix">
+        <div class="inner-right-column content-related">
+        {% include "admin/filer/tools/clipboard/clipboard.html" %}
+        </div>
+
+
+    <div class="inner-center-column">
         {% include "admin/filer/tools/search_form.html" %}
         <div class="js-navigator navigator{% if not actions_on_top and not actions_on_bottom %}navigator-no-actions{% endif %}">
             <form class="js-navigator-form" method="post">
@@ -263,5 +269,6 @@
                 {% endif %}
             </form>
         </div>
+    </div>
     </div>
 {% endblock %}

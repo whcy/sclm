@@ -74,8 +74,10 @@ class FileAdmin(PrimitivePermissionAwareModelAdmin):
         if settings.FILER_ENABLE_PERMISSIONS:
             fieldsets = fieldsets + (
                 (None, {
-                    'fields': ('is_public',
-                           'perm'
+                    'fields': (
+                         # 'is_public',
+                           'ispublic',
+                           'perm',
                            )
                 }),
             )
@@ -189,10 +191,12 @@ class FilePermissionAdminChangeFrom(forms.ModelForm):
         }
 
 class FilePermissionAdmin(admin.ModelAdmin):
-    list_display = ('name', 'can_read', 'can_edit', 'everybody')
+    # list_display = ('name', 'can_read', 'can_edit', 'everybody')
+    list_display = ('name', 'can_read')
     search_fields = ['name']
     form = FilePermissionAdminChangeFrom
-    fields = ('name', 'can_read', 'can_edit', 'everybody', 'groups')
+    # fields = ('name', 'can_read', 'can_edit', 'everybody', 'groups')
+    fields = ('name', 'can_read', 'groups')
 
 
 FileAdmin.fieldsets = FileAdmin.build_fieldsets()

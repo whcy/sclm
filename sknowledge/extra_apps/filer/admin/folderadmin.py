@@ -71,7 +71,7 @@ class AddFolderPopupForm(forms.ModelForm):
 
 class FolderAdmin(PrimitivePermissionAwareModelAdmin):
     # list_display = ('name',)
-    list_display = ('name', 'dire_phone',)
+    list_display = ('name',)
     exclude = ('parent',)
     list_per_page = 20
     list_filter = ('owner',)
@@ -269,6 +269,7 @@ class FolderAdmin(PrimitivePermissionAwareModelAdmin):
                 url = "%s%s" % (url, admin_url_params_encoded(request))
             return HttpResponseRedirect(url)
         elif folder_id is None:
+            # folder = Folder.objects.get(id=1)
             folder = FolderRoot()
         else:
             folder = get_object_or_404(Folder, id=folder_id)

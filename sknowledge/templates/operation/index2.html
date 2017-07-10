@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html>
+
+    <head>
+        <title>测试</title>
+    </head>
+
+    <body>
+        <h1>...</h1>
+        FOLDER <strong>{{ foldermessage }}</strong><br />
+        USER: <strong>{{ usermessage }}</strong><br />
+        <a href="/operation/index/">About</a><br />
+        <strong>{{usermessage}}能读{{fold.name}}里的文件</strong>
+        {% if canreadfilelist %}
+        <ul>
+           {% for file in canreadfilelist %}
+            <li> {{file.label}} </li>
+            {% if file.file_type == 'Image' %}
+            <img src={{file.icons.48}} width="28" height="28" >
+            {% endif %}
+            {% endfor %}
+        </ul>
+        {% endif %}
+        <strong>{{usermessage}}能读{{fold.name}}里的目录</strong>
+        {% if foldlist %}
+        <ul>
+           {% for folder in foldlist %}
+            <li> {{folder.name}} </li>
+            {% if folder.diricon %}
+            {% load thumbnail %}
+            <!-- <img src="{{folder.diricon.avator.url}}" alt=" " > -->
+            <!-- - 显示文件夹图片的缩略图 -->
+            <img src="{% thumbnail folder.diricon 100x100 crop %}" alt=" " />
+            {% endif %}
+            {% endfor %}
+        </ul>
+        {% endif %}
+            </body>
+
+</html>

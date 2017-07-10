@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 """
 Django settings for sknowledge project.
 
@@ -45,7 +46,8 @@ INSTALLED_APPS = [
     'debug_toolbar',
     'django_extensions',
     'logmanager',
-    'prodire'
+    'operation',
+    'video'
 ]
 
 MIDDLEWARE_CLASSES = [
@@ -167,7 +169,7 @@ USE_TZ = False
 # Static files (CSS, JavaScript, Images)
 # https://docs.djangoproject.com/en/1.9/howto/static-files/
 
-STATIC_URL = '/static/'
+STATIC_URL = '/collect_static/'
 STATICFILES_DIRS = (
     os.path.join(BASE_DIR, "static"),
     )
@@ -205,3 +207,15 @@ DEBUG_TOOLBAR_PANELS = [
     'debug_toolbar.panels.redirects.RedirectsPanel',
 ]
 APPEND_SLASH=True
+
+
+SESSION_COOKIE_AGE = 60 * 15   # 15分钟
+SESSION_SAVE_EVERY_REQUEST = True
+SESSION_EXPIRE_AT_BROWSER_CLOSE = True # 关闭浏览器，则COOKIE失效
+
+
+THUMBNAIL_ALIASES = {
+    '': {
+        'avatar': {'size': (50, 50), 'crop': True},
+    },
+}

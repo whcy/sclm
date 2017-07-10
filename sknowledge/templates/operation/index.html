@@ -1,0 +1,41 @@
+{% load i18n admin_static %}
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width,initial-scale=1,user-scalable=0">
+    <title>WeUI Demo</title>
+    {% block stylesheet %}
+    <link rel="stylesheet" href="http://res.wx.qq.com/open/libs/weui/0.4.0/weui.min.css">
+    <link rel="stylesheet" type="text/css" href="{% static "../../collect_static/operation/css/base.css" %}" />
+    <link rel="stylesheet" type="text/css" href="{% static "operation/css/index.css" %}" />
+    {% endblock %}
+    <script src="{% static "operation/js/index.js" %}" type="text/javascript"></script>
+</head>
+<body onload="generateList()">
+
+    <div class="titlePanelDiv">
+    	<div class="titleTextDiv">
+    	<text class="titleText">知识库</text>
+    	</div>
+    </div>
+
+    <div class="content" id="content">
+	    <!--<div class="rowDiv">-->
+	    	<!--<div class="gridItem">-->
+	    		<!--<a href="commodityDetail.html">-->
+	    			<!--<img class="gridImg" src="img/testImg.jpg">-->
+	    		<!--</a>-->
+	    		<!--<input type="text" disabled="true" class="gridText" value="商品名称"></text>-->
+	    		<!--<input type="text" disabled="true" class="gridButton" value="按钮"></text>-->
+	    	<!--</div>-->
+	    	<!--<div class="gridItem">-->
+	    		<!--<img class="gridImg" src="img/testImg.jpg">-->
+	    		<!--<input type="text" disabled="true" class="gridText" value="商品名称"></text>-->
+	    		<!--<input type="button" class="gridButton" value="按钮"></text>-->
+	    	<!--</div>-->
+	    <!--</div> -->
+
+	</div>
+
+</body>
+</html>

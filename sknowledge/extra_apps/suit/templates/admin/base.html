@@ -35,9 +35,9 @@
         {% if not is_popup %}
           <!-- Header -->
           <div id="header" class="header">
-            <div id="branding">
-              <a href="{% url 'admin:index' %}"><h1 id="site-name">{% block branding %}{{ 'ADMIN_NAME'|suit_conf }}{% endblock %}</h1></a>
-            </div>
+              <!-- <div id="branding"> -->
+              <!-- <a href="{% url 'admin:index' %}"><h1 id="site-name">{% block branding %}{{ 'ADMIN_NAME'|suit_conf }}{% endblock %}</h1></a> -->
+              <!-- </div> -->
 
             {% block header_time %}
             <div class="header-content header-content-first">
@@ -180,27 +180,27 @@
     <div class="content">
       <div class="tools">
         {% block footer_links %}
-          <a href="http://djangosuit.com/support/" target="_blank" class="icon"><i class="icon-question-sign"></i>Support</a>
-          <a href="http://djangosuit.com/pricing/" target="_blank" class="icon"><i class="icon-bookmark"></i>Licence</a>
-          <a href="http://github.com/darklow/django-suit/issues" target="_blank" class="icon"><i class="icon-comment"></i>Report a bug</a>
+          <!-- <a href="http://djangosuit.com/support/" target="_blank" class="icon"><i class="icon-question-sign"></i>Support</a> -->
+          <!-- <a href="http://djangosuit.com/pricing/" target="_blank" class="icon"><i class="icon-bookmark"></i>Licence</a> -->
+          <!-- <a href="http://github.com/darklow/django-suit/issues" target="_blank" class="icon"><i class="icon-comment"></i>Report a bug</a> -->
         {% endblock %}
       </div>
 
       <div class="copyright">
-        {% block copyright %}
-          Copyright &copy; 2013 DjangoSuit.com<br>Developed by <a href="http://djangosuit.com" target="_blank">DjangoSuit.com</a>
-        {% endblock %}
+          <!-- {% block copyright %} -->
+          <!-- Copyright &copy; 2013 DjangoSuit.com<br>Developed by <a href="http://djangosuit.com" target="_blank">DjangoSuit.com</a> -->
+          <!-- {% endblock %} -->
       </div>
 
-      <div class="branding">{% block footer_branding %}
-        {% with 'ADMIN_NAME'|suit_conf as admin_name %}
-          {{ admin_name }}
-          {% if admin_name == 'Django Suit' %}
-            v{{ 'VERSION'|suit_conf }}
-          {% endif %}
-        {% endwith %}
-      {% endblock %}</div>
-    </div>
+      <!-- <div class="branding">{% block footer_branding %} -->
+      <!-- {% with 'ADMIN_NAME'|suit_conf as admin_name %} -->
+      <!-- {{ admin_name }} -->
+      <!-- {% if admin_name == 'Django Suit' %} -->
+      <!-- v{{ 'VERSION'|suit_conf }} -->
+      <!-- {% endif %} -->
+      <!-- {% endwith %} -->
+      <!-- {% endblock %}</div> -->
+      <!-- </div> -->
   </div>
   {% endif %}
 {% endblock %}

@@ -63,8 +63,10 @@ class FilePermissionManager(models.Manager):
     #     return self.__get_id_list(user, "can_add_children")
 
     def __get_id_list(self, user, attr):
+        # if user.is_superuser or not filer_settings.FILER_ENABLE_PERMISSIONS:
+        #     return 'All'
         if user.is_superuser or not filer_settings.FILER_ENABLE_PERMISSIONS:
-            return 'All'
+            return File.objects.all().values_list('id', flat=True)
         allow_list = set()
         deny_list = set()
         group_ids = user.groups.all().values_list('id', flat=True)
@@ -80,15 +82,6 @@ class FilePermissionManager(models.Manager):
                 # Not allow nor deny, we continue with the next permission
                 continue
 
-            # if not perm.file:
-            #     assert perm.type == FilePermission.ALL
-
-            #     if p == FilePermission.ALLOW:
-            #         allow_list.update(Folder.objects.all().values_list('id', flat=True))
-            #     else:
-            #         deny_list.update(Folder.objects.all().values_list('id', flat=True))
-
-            #     continue
 
             file_ids = perm.file_set.all().values_list('id', flat=True)
 
@@ -96,14 +89,6 @@ class FilePermissionManager(models.Manager):
                 allow_list.update(file_ids)
             else:
                 deny_list.update(file_ids)
-
-            # if perm.type == FolderPermission.CHILDREN:
-            #     if p == FolderPermission.ALLOW:
-            #         allow_list.update(perm.folder.get_descendants().values_list('id', flat=True))
-            #     else:
-            #         deny_list.update(perm.folder.get_descendants().values_list('id', flat=True))
-
-        # Deny has precedence over allow
         return allow_list - deny_list
 
 
@@ -142,6 +127,11 @@ class File(PolymorphicModel, mixins.IconsMixin):
         help_text=_('Disable any permission checking for this '
                     'file. File will be publicly accessible '
                     'to anyone.'))
+
+    ispublic = models.BooleanField(
+        default=False,
+        verbose_name=_(u'公开'),
+        help_text=(u'所有用户可见'))
 
     objects = FileManager()
     perm = models.ForeignKey('FilePermission', verbose_name=(u'权限'),null=True, blank=True)
@@ -475,9 +465,13 @@ class FilePermission(models.Model):
     #     (CHILDREN, _('this item and all children')),
     # )
 
+    # PERMISIONS = (
+    #     (ALLOW, _('allow')),
+    #     (DENY, _('deny')),
+    # )
     PERMISIONS = (
-        (ALLOW, _('allow')),
-        (DENY, _('deny')),
+        (ALLOW, (u'允许')),
+        (DENY, (u'拒绝')),
     )
 
     # folder = models.ForeignKey(Folder, verbose_name=('folder'), null=True, blank=True)
@@ -488,7 +482,7 @@ class FilePermission(models.Model):
     everybody = models.BooleanField(_("everybody"), default=False)
 
     can_edit = models.SmallIntegerField(_(u"can edit"), choices=PERMISIONS, blank=True, null=True, default=None)
-    can_read = models.SmallIntegerField(_("can read"), choices=PERMISIONS, blank=True, null=True, default=None)
+    can_read = models.SmallIntegerField((u"读"), choices=PERMISIONS, blank=True, null=True, default=None)
     # can_add_children = models.SmallIntegerField(_("can add children"), choices=PERMISIONS, blank=True, null=True, default=None)
     objects = FilePermissionManager()
     name = models.CharField(max_length=255, default="", blank=True,
@@ -532,6 +526,7 @@ class FilePermission(models.Model):
 
 
     class Meta(object):
-        verbose_name = _('file permission')
-        verbose_name_plural = _('file permissions')
+        # verbose_name = _('file permission')
+        verbose_name = (u'文件权限')
+        # verbose_name_plural = _('file permissions')
         app_label = 'filer'

@@ -54,7 +54,11 @@
                                 <a href="{{ subfolder.get_admin_directory_listing_url_path }}{% filer_admin_context_url_params %}"
                                     title="{% blocktrans with subfolder.name as item_label %}Change '{{ item_label }}' folder details{% endblocktrans %}">
                                     <img src="{% static 'filer/icons/plainfolder_48x48.png' %}" alt="{% trans 'Folder Icon' %}" width="28" height="28">
+<!-- -如果目录也需要图标的话，注释取消，把上面句话注释掉 -->
+                                    <!-- {% load thumbnail %} -->
+                                    <!-- <img src="{% if subfolder.diricon %}{% thumbnail subfolder.diricon 50x50 crop %}{% else %}{% static 'filer/icons/plainfolder_48x48.png' %}{% endif %}" alt="{% trans 'Folder Icon' %}" width="28" height="28"> -->
                                 </a>
+                                
                             </td>
                             <td class="column-name">
                                 <div>
@@ -124,9 +128,9 @@
                                         {% endif %}
                                     </strong>
                                 </div>
-                                {% if enable_permissions %}
-                                    <div>{% trans "Permissions" %}: {% if file.is_public %}{% trans "disabled" %}{% else %}{% trans "enabled" %}{% endif %}</div>
-                                {% endif %}
+                                <!-- {% if enable_permissions %} -->
+                                <!-- <div>{% trans "Permissions" %}: {% if file.is_public %}{% trans "disabled" %}{% else %}{% trans "enabled" %}{% endif %}</div> -->
+                                <!-- {% endif %} -->
                             </td>
                             <td class="column-owner">
                                 {{ file.owner|default:"n/a" }}
